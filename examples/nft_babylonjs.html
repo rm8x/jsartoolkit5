@@ -1,0 +1,89 @@
+<html>
+<head>
+<title>NFT marker example with Babylon.js</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+<style>
+html,body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	text-align: center;
+	overflow-x: hidden;
+}
+.portrait canvas {
+	transform-origin: 0 0;
+	transform: rotate(-90deg) translateX(-100%);
+}
+.desktop canvas {
+ 	transform: scale(-1, 1);
+}
+</style>
+</head>
+<body>
+<canvas id="renderCanvas" width="640" height="480"></canvas>
+<h1>NFT marker example with Bablyon.js</h1>
+<p>On Chrome on Android, tap the screen to start playing video stream.</p>
+<p>Show  <a href="https://github.com/artoolkit/artoolkit5/blob/master/doc/Marker%20images/pinball.jpg">Pinball image</a> to camera to display a colorful object on top of it. Tap the screen to rotate the object.
+
+<script async src="../build/artoolkit.min.js"></script>
+<script src="js/third_party/babylon.js/babylon.2.5.max.js"></script>
+<script async src="../js/artoolkit.babylon.js"></script>
+
+<script>
+window.canvas = document.getElementById('renderCanvas');
+window.ARBabylonOnLoad = function() {
+
+	ARController.getUserMediaBabylonScene({maxARVideoSize: 320, cameraParam: 'data/camera_para.dat', 
+	onSuccess: function(arScene, arController, arCamera) {
+
+		document.body.className = arController.orientation;
+		
+		var engine = new BABYLON.Engine(window.canvas, true);
+        engine.setSize(window.canvas.width, window.canvas.height);
+		
+		if (arController.orientation === 'portrait') {
+			var w = (window.innerWidth / arController.videoHeight) * arController.videoWidth;
+			var h = window.innerWidth;
+			engine.setSize(w, h);
+			engine.domElement.style.paddingBottom = (w-h) + 'px';
+		} else {
+			if (/Android|mobile|iPad|iPhone/i.test(navigator.userAgent)) {
+				engine.setSize(window.innerWidth, (window.innerWidth / arController.videoWidth) * arController.videoHeight);
+			} else {
+				engine.setSize(arController.videoWidth, arController.videoHeight);
+				document.body.className += ' desktop';
+			}
+		}
+
+		var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), arScene.scene);
+		
+		var box = BABYLON.Mesh.CreateBox('box1', 1, arScene.scene);
+		box.position.z = 40;
+		box.position.x = 80;
+		box.position.y = 80;
+		var scalingFactor = new BABYLON.Vector3(80, 80, 80);
+		box.scaling = scalingFactor;
+		
+		arController.loadNFTMarker('dataNFT/pinball', function(markerId) {
+			var markerRoot = arController.createBabylonNFTMarker(markerId, arScene.scene);
+			box.parent = markerRoot;
+		});
+					
+		engine.runRenderLoop(function () {
+			arScene.process();
+			arScene.scene.render();
+		});	
+
+	}});
+
+	delete window.ARBabylonOnLoad;
+
+};
+
+if (window.ARController && ARController.getUserMediaBabylonScene) {
+	ARBabylonOnLoad();
+}
+</script>
+
+</body>
+</html>
