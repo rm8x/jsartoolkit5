@@ -25,9 +25,9 @@ html,body {
 <p>On Chrome on Android, tap the screen to start playing video stream.</p>
 <p>Show  <a href="https://github.com/artoolkit/artoolkit5/blob/master/doc/Marker%20images/pinball.jpg">Pinball image</a> to camera to display a colorful object on top of it. Tap the screen to rotate the object.
 
-<script async src="../build/artoolkit.min.js"></script>
+<script async src="js/artoolkit.min.js"></script>
 <script src="js/third_party/babylon.js/babylon.2.5.max.js"></script>
-<script async src="../js/artoolkit.babylon.js"></script>
+<script async src="js/artoolkit.babylon.js"></script>
 
 <script>
 window.canvas = document.getElementById('renderCanvas');
@@ -55,24 +55,30 @@ window.ARBabylonOnLoad = function() {
 			}
 		}
 
-		var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), arScene.scene);
+		var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(1, 0, 0), arScene.scene);
 		
 		var box = BABYLON.Mesh.CreateBox('box1', 1, arScene.scene);
 		box.position.z = 40;
 		box.position.x = 80;
 		box.position.y = 80;
-		var scalingFactor = new BABYLON.Vector3(80, 80, 80);
+		var scalingFactor = new BABYLON.Vector3(100, 100, 100);
 		box.scaling = scalingFactor;
+		box.isVisible = false;
 		
 		arController.loadNFTMarker('dataNFT/pinball', function(markerId) {
-			var markerRoot = arController.createBabylonNFTMarker(markerId, arScene.scene);
+		    var markerRoot = arController.createBabylonNFTMarker(markerId, arScene.scene);
 			box.parent = markerRoot;
 		});
 					
-		engine.runRenderLoop(function () {
+		engine.runRenderLoop(function () {		
 			arScene.process();
 			arScene.scene.render();
-		});	
+		});
+
+        // the canvas/window resize event handler
+        window.addEventListener('resize', function () {
+            engine.resize();
+        });		
 
 	}});
 
